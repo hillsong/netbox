@@ -564,6 +564,8 @@ class DeviceType(models.Model):
                                  help_text="This type of device has power outlets")
     is_network_device = models.BooleanField(default=True, verbose_name='Is a network device',
                                             help_text="This type of device has network interfaces")
+    is_vc_candidate = models.BooleanField(default=False, verbose_name='Is a virtual chassis candidate',
+                                          help_text="This type of device can become a member of a virtual chassis")
     subdevice_role = models.NullBooleanField(default=None, verbose_name='Parent/child status',
                                              choices=SUBDEVICE_ROLE_CHOICES,
                                              help_text="Parent devices house child devices in device bays. Select "
@@ -1237,3 +1239,16 @@ class Module(models.Model):
 
     def __unicode__(self):
         return self.name
+
+
+class VirtualChassisMembership(models.Model):
+    """
+    A relationship between a virtual chassis member and its master device.
+    """
+    master = models.ForeignKey('Device', related_name='vc_members', on_delete=models.CASCADE)
+    member = models.OneToOneField('Device', related_name='virtual_chassis', on_delete=models.CASCADE)
+    position = models.PositiveSmallIntegerField()
+
+    class Meta:
+        ordering = ['master', 'position']
+        unique_together = ['master', 'position']

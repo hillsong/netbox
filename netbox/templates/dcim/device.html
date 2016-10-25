@@ -81,6 +81,42 @@
                 </tr>
             </table>
         </div>
+        {% if device.device_type.is_vc_candidate %}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <strong>Virtual Chassis</strong>
+                </div>
+                {% if device.virtual_chassis %}
+                    <table class="table table-hover panel-body">
+                        {% for membership in device.virtual_chassis.master.vc_members.all %}
+                            <tr>
+                                <td><a href="{% url 'dcim:device' pk=membership.member.pk %}">{{ membership.member }}</a></td>
+                                <td>{{ membership.position }}</td>
+                                <td>
+                                    {% if membership.master == membership.member %}
+                                        <label class="label label-primary">Master</label>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                    {% if perms.dcim.change_device %}
+                        <div class="panel-footer text-right">
+                            <a href="{% url 'dcim:virtualchassis_destroy' pk=device.pk %}" class="btn btn-xs btn-danger"><i class="glyphicon glyphicon-trash"></i> Destroy</a>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="panel-body">
+                        <span class="text-muted">Not a virtual chassis member</span>
+                    </div>
+                    {% if perms.dcim.change_device %}
+                        <div class="panel-footer text-right">
+                            <a href="{% url 'dcim:virtualchassis_create' pk=device.pk %}" class="btn btn-xs btn-primary"><i class="glyphicon glyphicon-plus"></i> Create virtual chassis</a>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        {% endif %}
         <div class="panel panel-default">
             <div class="panel-heading">
                 <strong>Management</strong>

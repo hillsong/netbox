@@ -1,0 +1,47 @@
+{% extends '_base.html' %}
+{% load form_helpers %}
+
+{% block title %}Create a Virtual Chassis{% endblock %}
+
+{% block content %}
+    <form action="." method="post" class="form form-horizontal">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+                <h3>Create a Virtual Chassis</h3>
+                {% if form.non_field_errors %}
+                    <div class="panel panel-danger">
+                        <div class="panel-heading">
+                            <strong>Errors</strong>
+                        </div>
+                        <div class="panel-body">
+                            {{ form.non_field_errors }}
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <strong>Membership</strong>
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <label class="col-md-3 control-label required">Master</label>
+                            <div class="col-md-9">
+                                <p class="form-control-static">
+                                    {{ device }}
+                                </p>
+                            </div>
+                        </div>
+                        {% render_field form.position %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3 text-right">
+                <button type="submit" name="_create" class="btn btn-primary">Create</button>
+                <a href="{{ cancel_url }}" class="btn btn-default">Cancel</a>
+            </div>
+        </div>
+    </form>
+{% endblock %}

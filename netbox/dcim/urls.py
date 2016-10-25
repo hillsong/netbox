@@ -168,4 +168,8 @@ urlpatterns = [
     url(r'^modules/(?P<pk>\d+)/edit/$', views.module_edit, name='module_edit'),
     url(r'^modules/(?P<pk>\d+)/delete/$', views.module_delete, name='module_delete'),
 
+    # Virtual chassis
+    url(r'^virtual-chassis/(?P<pk>\d+)/create/$', views.virtualchassis_create, name='virtualchassis_create'),
+    url(r'^virtual-chassis/(?P<pk>\d+)/destroy/$', views.virtualchassis_destroy, name='virtualchassis_destroy'),
+
 ]

@@ -27,7 +27,7 @@ from .models import (
     CONNECTION_STATUS_CONNECTED, ConsolePort, ConsolePortTemplate, ConsoleServerPort, ConsoleServerPortTemplate, Device,
     DeviceBay, DeviceBayTemplate, DeviceRole, DeviceType, Interface, InterfaceConnection, InterfaceTemplate,
     Manufacturer, Module, Platform, PowerOutlet, PowerOutletTemplate, PowerPort, PowerPortTemplate, Rack, RackGroup,
-    RackRole, Site,
+    RackRole, Site, VirtualChassisMembership,
 )
 
 
@@ -1823,4 +1823,67 @@ def module_delete(request, pk):
         'module': module,
         'form': form,
         'cancel_url': reverse('dcim:device_inventory', kwargs={'pk': module.device.pk}),
+    })
+
+
+#
+# Virtual chassis
+#
+
+@permission_required('dcim.add_virtualchassismembership')
+def virtualchassis_create(request, pk):
+
+    device = get_object_or_404(Device, pk=pk)
+    if VirtualChassisMembership.objects.filter(master=device).exists():
+        messages.warning(request, "{} is already the master of a virtual chassis.".format(device))
+        return redirect('dcim:device', pk=device.pk)
+
+    if request.POST:
+        form = forms.VirtualChassisMembershipForm({
+            'master': device.pk,
+            'member': device.pk,
+            'position': request.POST.get('position', None),
+        })
+        if form.is_valid():
+            vcm = form.save()
+            messages.success(request, "Created a new virtual chassis with {} as master (position {}).".format(
+                vcm.master, vcm.position
+            ))
+            return redirect('dcim:device', pk=device.pk)
+
+    else:
+        form = forms.VirtualChassisMembershipForm()
+
+    return render(request, 'dcim/virtualchassis_create.html', {
+        'device': device,
+        'form': form,
+        'cancel_url': reverse('dcim:device', kwargs={'pk': device.pk}),
+    })
+
+
+@permission_required('dcim.add_virtualchassismembership')
+def virtualchassis_destroy(request, pk):
+
+    device = get_object_or_404(Device, pk=pk)
+
+    if request.POST:
+        form = ConfirmationForm(request.POST)
+        if form.is_valid():
+            vc_memberships = VirtualChassisMembership.objects.filter(master=device)
+            if vc_memberships:
+                vc_memberships.delete()
+                messages.success(request, "Destroyed virtual chassis with master {}".format(device))
+            else:
+                messages.warning(request, "No virtual chassis found with master {}. No action has been taken."
+                                 .format(device))
+
+            return redirect('dcim:device', pk=device.pk)
+
+    else:
+        form = ConfirmationForm()
+
+    return render(request, 'dcim/virtualchassis_destroy.html', {
+        'device': device,
+        'form': form,
+        'cancel_url': reverse('dcim:device', kwargs={'pk': device.pk}),
     })

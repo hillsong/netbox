@@ -18,7 +18,7 @@ from .models import (
     ConsolePort, ConsolePortTemplate, ConsoleServerPort, ConsoleServerPortTemplate, Device, DeviceRole, DeviceType,
     Interface, IFACE_FF_CHOICES, IFACE_FF_VIRTUAL, InterfaceConnection, InterfaceTemplate, Manufacturer, Module,
     Platform, PowerOutlet, PowerOutletTemplate, PowerPort, PowerPortTemplate, RACK_TYPE_CHOICES, RACK_WIDTH_CHOICES,
-    Rack, RackGroup, RackRole, Site, STATUS_CHOICES, SUBDEVICE_ROLE_CHILD
+    Rack, RackGroup, RackRole, Site, STATUS_CHOICES, SUBDEVICE_ROLE_CHILD, VirtualChassisMembership,
 )
 
 
@@ -258,7 +258,7 @@ class DeviceTypeForm(forms.ModelForm, BootstrapMixin):
     class Meta:
         model = DeviceType
         fields = ['manufacturer', 'model', 'slug', 'part_number', 'u_height', 'is_full_depth', 'is_console_server',
-                  'is_pdu', 'is_network_device', 'subdevice_role']
+                  'is_pdu', 'is_network_device', 'is_vc_candidate', 'subdevice_role']
 
 
 class DeviceTypeBulkEditForm(BulkEditForm, BootstrapMixin):
@@ -1259,3 +1259,13 @@ class ModuleForm(forms.ModelForm, BootstrapMixin):
     class Meta:
         model = Module
         fields = ['name', 'manufacturer', 'part_id', 'serial']
+
+
+#
+# Virtual chassis
+
+class VirtualChassisMembershipForm(forms.ModelForm, BootstrapMixin):
+
+    class Meta:
+        model = VirtualChassisMembership
+        fields = ['master', 'member', 'position']

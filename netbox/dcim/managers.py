@@ -14,22 +14,6 @@ CHANNEL_RE = r"COALESCE(CAST(SUBSTRING({} FROM '^.*:(\d{{1,9}})(\.\d{{1,9}})?$')
 VC_RE = r"COALESCE(CAST(SUBSTRING({} FROM '^.*\.(\d{{1,9}})$') AS integer), 0)"
 
 
-class DeviceComponentManager(Manager):
-
-    def get_queryset(self):
-
-        queryset = super().get_queryset()
-        table_name = self.model._meta.db_table
-        sql = r"CONCAT(REGEXP_REPLACE({}.name, '\d+$', ''), LPAD(SUBSTRING({}.name FROM '\d+$'), 8, '0'))"
-
-        # Pad any trailing digits to effect natural sorting
-        return queryset.extra(
-            select={
-                'name_padded': sql.format(table_name, table_name),
-            }
-        ).order_by('name_padded', 'pk')
-
-
 class InterfaceQuerySet(QuerySet):
 
     def connectable(self):
@@ -37,7 +21,7 @@ class InterfaceQuerySet(QuerySet):
         Return only physical interfaces which are capable of being connected to other interfaces (i.e. not virtual or
         wireless).
         """
-        return self.exclude(form_factor__in=NONCONNECTABLE_IFACE_TYPES)
+        return self.exclude(type__in=NONCONNECTABLE_IFACE_TYPES)
 
 
 class InterfaceManager(Manager):

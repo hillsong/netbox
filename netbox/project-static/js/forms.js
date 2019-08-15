@@ -156,11 +156,12 @@ $(document).ready(function() {
                 filter_for_elements.each(function(index, filter_for_element) {
                     var param_name = $(filter_for_element).attr(attr_name);
                     var is_nullable = $(filter_for_element).attr("nullable");
+                    var is_visible = $(filter_for_element).is(":visible");
                     var value = $(filter_for_element).val();
 
-                    if (param_name && value) {
+                    if (param_name && is_visible && value) {
                         parameters[param_name] = value;
-                    } else if (param_name && is_nullable) {
+                    } else if (param_name && is_visible && is_nullable) {
                         parameters[param_name] = "null";
                     }
                 });
@@ -182,7 +183,7 @@ $(document).ready(function() {
                 // Additional query params
                 $.each(element.attributes, function(index, attr){
                     if (attr.name.includes("data-additional-query-param-")){
-                        var param_name = attr.name.split("data-additional-query-param-")[1]
+                        var param_name = attr.name.split("data-additional-query-param-")[1];
                         parameters[param_name] = attr.value;
                     }
                 });
@@ -193,6 +194,8 @@ $(document).ready(function() {
 
             processResults: function (data) {
                 var element = this.$element[0];
+                // Clear any disabled options
+                $(element).children('option').attr('disabled', false);
                 var results = $.map(data.results, function (obj) {
                     obj.text = obj[element.getAttribute('display-field')] || obj.name;
                     obj.id = obj[element.getAttribute('value-field')] || obj.id;
@@ -206,7 +209,7 @@ $(document).ready(function() {
 
                 // Handle the null option, but only add it once
                 if (element.getAttribute('data-null-option') && data.previous === null) {
-                    var null_option = $(element).children()[0]
+                    var null_option = $(element).children()[0];
                     results.unshift({
                         id: null_option.value,
                         text: null_option.text
@@ -266,6 +269,10 @@ $(document).ready(function() {
 
             processResults: function (data) {
                 var results = $.map(data.results, function (obj) {
+                    // If tag contains space add double quotes
+                    if (/\s/.test(obj.name))
+                        obj.name = '"' + obj.name + '"'
+
                     return {
                         id: obj.name,
                         text: obj.name

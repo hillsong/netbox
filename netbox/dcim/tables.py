@@ -74,7 +74,8 @@ RACKROLE_ACTIONS = """
 
 RACK_ROLE = """
 {% if record.role %}
-    <label class="label" style="background-color: #{{ record.role.color }}">{{ value }}</label>
+    {% load helpers %}
+    <label class="label" style="color: {{ record.role.color|fgcolor }}; background-color: #{{ record.role.color }}">{{ value }}</label>
 {% else %}
     &mdash;
 {% endif %}
@@ -729,6 +730,7 @@ class PowerConnectionTable(BaseTable):
         viewname='dcim:device',
         accessor=Accessor('connected_endpoint.device'),
         args=[Accessor('connected_endpoint.device.pk')],
+        order_by='_connected_poweroutlet__device',
         verbose_name='PDU'
     )
     outlet = tables.Column(

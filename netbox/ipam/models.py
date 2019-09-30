@@ -382,7 +382,7 @@ class Prefix(ChangeLoggedModel, CustomFieldModel):
     def to_csv(self):
         return (
             self.prefix,
-            self.vrf.rd if self.vrf else None,
+            self.vrf.name if self.vrf else None,
             self.tenant.name if self.tenant else None,
             self.site.name if self.site else None,
             self.vlan.group.name if self.vlan and self.vlan.group else None,
@@ -647,26 +647,20 @@ class IPAddress(ChangeLoggedModel, CustomFieldModel):
 
         super().save(*args, **kwargs)
 
-    def log_change(self, user, request_id, action):
-        """
-        Include the connected Interface (if any).
-        """
-
-        # It's possible that an IPAddress can be deleted _after_ its parent Interface, in which case trying to resolve
-        # the interface will raise DoesNotExist.
+    def to_objectchange(self, action):
+        # Annotate the assigned Interface (if any)
         try:
             parent_obj = self.interface
         except ObjectDoesNotExist:
             parent_obj = None
 
-        ObjectChange(
-            user=user,
-            request_id=request_id,
+        return ObjectChange(
             changed_object=self,
-            related_object=parent_obj,
+            object_repr=str(self),
             action=action,
+            related_object=parent_obj,
             object_data=serialize_object(self)
-        ).save()
+        )
 
     def to_csv(self):
 
@@ -680,7 +674,7 @@ class IPAddress(ChangeLoggedModel, CustomFieldModel):
 
         return (
             self.address,
-            self.vrf.rd if self.vrf else None,
+            self.vrf.name if self.vrf else None,
             self.tenant.name if self.tenant else None,
             self.get_status_display(),
             self.get_role_display(),
